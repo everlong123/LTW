@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Tour</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tour Du Lịch</h1>
+            <nav>
+                <a th:href="@{/tours}">Trang Chủ</a>
+                <span th:if="${#authentication.isAuthenticated()}">
+                    <a th:href="@{/bookings/my-bookings}">Tour Của Tôi</a>
+                    <span sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/tours/admin}">Quản Lý Tour</a>
+                        <a th:href="@{/bookings/admin}">Quản Lý Đặt Tour</a>
+                    </span>
+                    <span>Xin chào, <strong th:text="${#authentication.name}"></strong></span>
+                    <a th:href="@{/logout}">Đăng xuất</a>
+                </span>
+                <span th:unless="${#authentication.isAuthenticated()}">
+                    <a th:href="@{/login}">Đăng nhập</a>
+                    <a th:href="@{/register}">Đăng ký</a>
+                </span>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <h2>Tìm kiếm Tour</h2>
+                <form th:action="@{/tours}" method="get" class="filter-form">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="location">Địa điểm:</label>
+                            <input type="text" id="location" name="location" th:value="${location}" placeholder="Nhập địa điểm">
+                        </div>
+                        <div class="filter-group">
+                            <label for="numberOfDays">Số ngày:</label>
+                            <input type="number" id="numberOfDays" name="numberOfDays" th:value="${numberOfDays}" min="1" placeholder="Số ngày">
+                        </div>
+                        <div class="filter-group">
+                            <label for="minPrice">Giá từ (VNĐ):</label>
+                            <input type="number" id="minPrice" name="minPrice" th:value="${minPrice}" min="0" placeholder="Giá tối thiểu">
+                        </div>
+                        <div class="filter-group">
+                            <label for="maxPrice">Giá đến (VNĐ):</label>
+                            <input type="number" id="maxPrice" name="maxPrice" th:value="${maxPrice}" min="0" placeholder="Giá tối đa">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    <a th:href="@{/tours}" class="btn">Xóa bộ lọc</a>
+                </form>
+            </div>
+
+            <!-- Tours Grid -->
+            <div class="tours-grid">
+                <div th:each="tour : ${tours}" class="tour-card">
+                    <div class="tour-image">
+                        <img th:src="${tour.imageUrl != null ? tour.imageUrl : '/images/default-tour.jpg'}" 
+                             th:alt="${tour.name}" 
+                             onerror="this.src='/images/default-tour.jpg'">
+                    </div>
+                    <div class="tour-content">
+                        <h3 th:text="${tour.name}"></h3>
+                        <p class="tour-location"><strong>Địa điểm:</strong> <span th:text="${tour.location}"></span></p>
+                        <p class="tour-days"><strong>Số ngày:</strong> <span th:text="${tour.numberOfDays}"></span> ngày</p>
+                        <p class="tour-date"><strong>Khởi hành:</strong> <span th:text="${#temporals.format(tour.departureDate, 'dd/MM/yyyy')}"></span></p>
+                        <p class="tour-price"><strong>Giá:</strong> <span th:text="${#numbers.formatDecimal(tour.price, 0, 'COMMA', 0, 'POINT')}"></span> VNĐ</p>
+                        <p class="tour-availability">
+                            <strong>Chỗ còn lại:</strong> 
+                            <span th:text="${tour.availableSlots}"></span> / <span th:text="${tour.maxCustomers}"></span>
+                        </p>
+                        <div class="tour-actions">
+                            <a th:href="@{/tours/{id}(id=${tour.id})}" class="btn btn-primary">Xem chi tiết</a>
+                            <a th:if="${tour.availableSlots > 0}" 
+                               th:href="@{/bookings/new/{id}(id=${tour.id})}" 
+                               class="btn">Đặt tour</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(tours)}" class="no-results">
+                <p>Không tìm thấy tour nào phù hợp với tiêu chí tìm kiếm.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
+

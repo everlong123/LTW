@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${tour.name}">Chi Tiết Tour</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Chi Tiết Tour</h1>
+            <nav>
+                <a th:href="@{/tours}">Trang Chủ</a>
+                <span th:if="${#authentication.isAuthenticated()}">
+                    <a th:href="@{/bookings/my-bookings}">Tour Của Tôi</a>
+                    <span sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/tours/admin}">Quản Lý Tour</a>
+                        <a th:href="@{/bookings/admin}">Quản Lý Đặt Tour</a>
+                    </span>
+                    <span>Xin chào, <strong th:text="${#authentication.name}"></strong></span>
+                    <a th:href="@{/logout}">Đăng xuất</a>
+                </span>
+                <span th:unless="${#authentication.isAuthenticated()}">
+                    <a th:href="@{/login}">Đăng nhập</a>
+                    <a th:href="@{/register}">Đăng ký</a>
+                </span>
+            </nav>
+        </header>
+
+        <main>
+            <div class="tour-detail">
+                <div class="tour-detail-image">
+                    <img th:src="${tour.imageUrl != null ? tour.imageUrl : '/images/default-tour.jpg'}" 
+                         th:alt="${tour.name}" 
+                         onerror="this.src='/images/default-tour.jpg'">
+                </div>
+                <div class="tour-detail-content">
+                    <h2 th:text="${tour.name}"></h2>
+                    <div class="tour-info-grid">
+                        <div class="info-item">
+                            <strong>Địa điểm:</strong>
+                            <span th:text="${tour.location}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Số ngày:</strong>
+                            <span th:text="${tour.numberOfDays}"></span> ngày
+                        </div>
+                        <div class="info-item">
+                            <strong>Ngày khởi hành:</strong>
+                            <span th:text="${#temporals.format(tour.departureDate, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Giá tour:</strong>
+                            <span class="price" th:text="${#numbers.formatDecimal(tour.price, 0, 'COMMA', 0, 'POINT')}"></span> VNĐ
+                        </div>
+                        <div class="info-item">
+                            <strong>Số chỗ còn lại:</strong>
+                            <span th:text="${tour.availableSlots}"></span> / <span th:text="${tour.maxCustomers}"></span>
+                        </div>
+                    </div>
+                    <div class="tour-description">
+                        <h3>Mô tả chi tiết:</h3>
+                        <p th:text="${tour.description != null ? tour.description : 'Chưa có mô tả'}"></p>
+                    </div>
+                    <div class="tour-actions">
+                        <a th:if="${tour.availableSlots > 0}" 
+                           th:href="@{/bookings/new/{id}(id=${tour.id})}" 
+                           class="btn btn-primary btn-large">Đặt Tour Ngay</a>
+                        <a th:href="@{/tours}" class="btn">Quay lại</a>
+                        <span th:if="${tour.availableSlots == 0}" class="unavailable">
+                            Tour đã hết chỗ
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
+

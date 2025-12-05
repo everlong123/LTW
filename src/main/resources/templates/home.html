@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Hệ Thống Quản Lý Tour</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hệ Thống Quản Lý Tour Du Lịch</h1>
+            <nav>
+                <a th:href="@{/home}">Trang Chủ</a>
+                <span th:if="${username}">
+                    <span>Xin chào, <strong th:text="${username}"></strong></span>
+                    <a th:href="@{/logout}">Đăng xuất</a>
+                </span>
+                <span th:unless="${username}">
+                    <a th:href="@{/login}">Đăng nhập</a>
+                    <a th:href="@{/register}">Đăng ký</a>
+                </span>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Welcome Section -->
+            <div class="welcome-box">
+                <h2>Chào mừng đến với Hệ Thống Quản Lý Tour Du Lịch</h2>
+                <p>Khám phá và đặt tour du lịch trong và ngoài nước một cách dễ dàng</p>
+            </div>
+
+            <!-- Chức năng cho Khách hàng -->
+            <div class="features-section">
+                <h2>Dành cho Khách hàng</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>🔍 Xem Danh Sách Tour</h3>
+                        <p>Khám phá các tour du lịch hấp dẫn với đầy đủ thông tin</p>
+                        <a th:href="@{/tours}" class="btn btn-primary">Xem Tour</a>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📅 Đặt Tour Online</h3>
+                        <p>Đặt tour nhanh chóng, tiện lợi chỉ với vài cú click</p>
+                        <a th:href="@{/tours}" class="btn btn-primary">Đặt Tour</a>
+                    </div>
+                    <div class="feature-card" th:if="${username}">
+                        <h3>📋 Tour Của Tôi</h3>
+                        <p>Xem lịch sử và quản lý các tour đã đặt</p>
+                        <a th:href="@{/bookings/my-bookings}" class="btn btn-primary">Xem Tour Của Tôi</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chức năng cho Admin -->
+            <div class="features-section" th:if="${isAdmin}">
+                <h2>Dành cho Quản trị viên</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>➕ Quản Lý Tour</h3>
+                        <p>Thêm, sửa, xóa tour du lịch</p>
+                        <a th:href="@{/tours/admin}" class="btn btn-primary">Quản Lý Tour</a>
+                    </div>
+                    <div class="feature-card">
+                        <h3>👥 Quản Lý Đặt Tour</h3>
+                        <p>Theo dõi và quản lý các đơn đặt tour của khách hàng</p>
+                        <a th:href="@{/bookings/admin}" class="btn btn-primary">Quản Lý Đặt Tour</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin đăng nhập -->
+            <div class="user-info" th:if="${username}">
+                <h3>Thông tin tài khoản</h3>
+                <p><strong>Username:</strong> <span th:text="${username}"></span></p>
+                <p><strong>Quyền:</strong></p>
+                <ul>
+                    <li th:each="authority : ${authorities}" th:text="${authority.authority}"></li>
+                </ul>
+            </div>
+
+            <!-- Hướng dẫn cho người chưa đăng nhập -->
+            <div class="welcome-box" th:unless="${username}">
+                <h3>Bắt đầu sử dụng</h3>
+                <p>Để sử dụng đầy đủ các chức năng, vui lòng:</p>
+                <div class="auth-actions">
+                    <a th:href="@{/register}" class="btn btn-primary">Đăng ký tài khoản</a>
+                    <a th:href="@{/login}" class="btn">Đăng nhập</a>
+                </div>
+                <p style="margin-top: 20px;">Hoặc bạn có thể <a th:href="@{/tours}">xem tour</a> mà không cần đăng nhập</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

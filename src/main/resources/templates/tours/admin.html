@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tour</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Quản Lý Tour</h1>
+            <nav>
+                <a th:href="@{/tours}">Trang Chủ</a>
+                <a th:href="@{/bookings/admin}">Quản Lý Đặt Tour</a>
+                <span>Xin chào, <strong th:text="${#authentication.name}"></strong></span>
+                <a th:href="@{/logout}">Đăng xuất</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="admin-header">
+                <h2>Danh sách Tour</h2>
+                <a th:href="@{/tours/admin/new}" class="btn btn-primary">Thêm Tour Mới</a>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ảnh</th>
+                            <th>Tên Tour</th>
+                            <th>Địa điểm</th>
+                            <th>Số ngày</th>
+                            <th>Ngày khởi hành</th>
+                            <th>Giá</th>
+                            <th>Số chỗ</th>
+                            <th>Chỗ còn lại</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="tour : ${tours}">
+                            <td th:text="${tour.id}"></td>
+                            <td>
+                                <img th:src="${tour.imageUrl != null ? tour.imageUrl : '/images/default-tour.jpg'}" 
+                                     alt="Tour" class="table-image"
+                                     onerror="this.src='/images/default-tour.jpg'">
+                            </td>
+                            <td th:text="${tour.name}"></td>
+                            <td th:text="${tour.location}"></td>
+                            <td th:text="${tour.numberOfDays}"></td>
+                            <td th:text="${#temporals.format(tour.departureDate, 'dd/MM/yyyy')}"></td>
+                            <td th:text="${#numbers.formatDecimal(tour.price, 0, 'COMMA', 0, 'POINT')}"></td>
+                            <td th:text="${tour.maxCustomers}"></td>
+                            <td th:text="${tour.availableSlots}"></td>
+                            <td>
+                                <a th:href="@{/tours/admin/edit/{id}(id=${tour.id})}" class="btn btn-small">Sửa</a>
+                                <a th:href="@{/bookings/admin/tour/{id}(id=${tour.id})}" class="btn btn-small">Xem đặt tour</a>
+                                <form th:action="@{/tours/admin/delete/{id}(id=${tour.id})}" method="post" style="display: inline;">
+                                    <button type="submit" class="btn btn-small btn-danger" 
+                                            onclick="return confirm('Bạn có chắc chắn muốn xóa tour này?')">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${#lists.isEmpty(tours)}" class="no-results">
+                <p>Chưa có tour nào. <a th:href="@{/tours/admin/new}">Thêm tour mới</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
+

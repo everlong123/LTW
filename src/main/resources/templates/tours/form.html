@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${tour.id != null ? 'Chỉnh sửa Tour' : 'Thêm Tour Mới'}">Quản Lý Tour</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 th:text="${tour.id != null ? 'Chỉnh sửa Tour' : 'Thêm Tour Mới'}"></h1>
+            <nav>
+                <a th:href="@{/tours}">Trang Chủ</a>
+                <a th:href="@{/tours/admin}">Quản Lý Tour</a>
+                <span>Xin chào, <strong th:text="${#authentication.name}"></strong></span>
+                <a th:href="@{/logout}">Đăng xuất</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <form th:action="@{/tours/admin/save}" th:object="${tour}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" th:field="*{id}">
+                    
+                    <div class="form-group">
+                        <label for="name">Tên tour *</label>
+                        <input type="text" id="name" th:field="*{name}" required>
+                        <span th:if="${#fields.hasErrors('name')}" class="error-message" th:errors="*{name}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imageFile">Ảnh tour</label>
+                        <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                        <div th:if="${tour.imageUrl != null}" class="current-image">
+                            <p>Ảnh hiện tại:</p>
+                            <img th:src="${tour.imageUrl}" alt="Tour image" style="max-width: 200px;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="price">Giá tour (VNĐ) *</label>
+                        <input type="number" id="price" th:field="*{price}" step="0.01" min="0" required>
+                        <span th:if="${#fields.hasErrors('price')}" class="error-message" th:errors="*{price}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Địa điểm *</label>
+                        <input type="text" id="location" th:field="*{location}" required>
+                        <span th:if="${#fields.hasErrors('location')}" class="error-message" th:errors="*{location}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numberOfDays">Số ngày *</label>
+                        <input type="number" id="numberOfDays" th:field="*{numberOfDays}" min="1" required>
+                        <span th:if="${#fields.hasErrors('numberOfDays')}" class="error-message" th:errors="*{numberOfDays}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="departureDate">Ngày khởi hành *</label>
+                        <input type="date" id="departureDate" th:field="*{departureDate}" required>
+                        <span th:if="${#fields.hasErrors('departureDate')}" class="error-message" th:errors="*{departureDate}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxCustomers">Số khách tối đa *</label>
+                        <input type="number" id="maxCustomers" th:field="*{maxCustomers}" min="1" required>
+                        <span th:if="${#fields.hasErrors('maxCustomers')}" class="error-message" th:errors="*{maxCustomers}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Mô tả chi tiết</label>
+                        <textarea id="description" th:field="*{description}" rows="5"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                        <a th:href="@{/tours/admin}" class="btn">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
+

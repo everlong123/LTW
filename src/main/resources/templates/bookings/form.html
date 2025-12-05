@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Tour</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Đặt Tour</h1>
+            <nav>
+                <a th:href="@{/tours}">Trang Chủ</a>
+                <span th:if="${#authentication.isAuthenticated()}">
+                    <a th:href="@{/bookings/my-bookings}">Tour Của Tôi</a>
+                    <span>Xin chào, <strong th:text="${#authentication.name}"></strong></span>
+                    <a th:href="@{/logout}">Đăng xuất</a>
+                </span>
+                <span th:unless="${#authentication.isAuthenticated()}">
+                    <a th:href="@{/login}">Đăng nhập</a>
+                    <a th:href="@{/register}">Đăng ký</a>
+                </span>
+            </nav>
+        </header>
+
+        <main>
+            <div class="booking-container">
+                <div class="booking-tour-info">
+                    <h2 th:text="${tour.name}"></h2>
+                    <div class="tour-summary">
+                        <p><strong>Địa điểm:</strong> <span th:text="${tour.location}"></span></p>
+                        <p><strong>Số ngày:</strong> <span th:text="${tour.numberOfDays}"></span> ngày</p>
+                        <p><strong>Ngày khởi hành:</strong> <span th:text="${#temporals.format(tour.departureDate, 'dd/MM/yyyy')}"></span></p>
+                        <p><strong>Giá tour:</strong> <span class="price" th:text="${#numbers.formatDecimal(tour.price, 0, 'COMMA', 0, 'POINT')}"></span> VNĐ/người</p>
+                        <p><strong>Chỗ còn lại:</strong> <span th:text="${tour.availableSlots}"></span></p>
+                    </div>
+                </div>
+
+                <div class="booking-form-section">
+                    <h2>Thông tin đặt tour</h2>
+                    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+                    <form th:action="@{/bookings/create}" th:object="${booking}" method="post">
+                        <input type="hidden" name="tourId" th:value="${tour.id}">
+
+                        <div class="form-group">
+                            <label for="customerName">Họ và tên *</label>
+                            <input type="text" id="customerName" th:field="*{customerName}" required>
+                            <span th:if="${#fields.hasErrors('customerName')}" class="error-message" th:errors="*{customerName}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customerEmail">Email *</label>
+                            <input type="email" id="customerEmail" th:field="*{customerEmail}" required>
+                            <span th:if="${#fields.hasErrors('customerEmail')}" class="error-message" th:errors="*{customerEmail}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customerPhone">Số điện thoại *</label>
+                            <input type="tel" id="customerPhone" th:field="*{customerPhone}" required>
+                            <span th:if="${#fields.hasErrors('customerPhone')}" class="error-message" th:errors="*{customerPhone}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customerAddress">Địa chỉ</label>
+                            <textarea id="customerAddress" th:field="*{customerAddress}" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="numberOfPeople">Số người đi *</label>
+                            <input type="number" id="numberOfPeople" th:field="*{numberOfPeople}" min="1" th:max="${tour.availableSlots}" required>
+                            <span th:if="${#fields.hasErrors('numberOfPeople')}" class="error-message" th:errors="*{numberOfPeople}"></span>
+                            <small class="form-hint">Tối đa <span th:text="${tour.availableSlots}"></span> người</small>
+                        </div>
+
+                        <div class="price-calculation">
+                            <p><strong>Tổng giá:</strong> 
+                                <span id="totalPrice" class="price">0</span> VNĐ
+                            </p>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-large">Xác nhận đặt tour</button>
+                            <a th:href="@{/tours/{id}(id=${tour.id})}" class="btn">Quay lại</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const pricePerPerson = [[${tour.price}]];
+        const maxPeople = [[${tour.availableSlots}]];
+        const numberOfPeopleInput = document.getElementById('numberOfPeople');
+        const totalPriceSpan = document.getElementById('totalPrice');
+
+        function calculateTotal() {
+            const numberOfPeople = parseInt(numberOfPeopleInput.value) || 0;
+            const total = pricePerPerson * numberOfPeople;
+            totalPriceSpan.textContent = total.toLocaleString('vi-VN');
+        }
+
+        numberOfPeopleInput.addEventListener('input', calculateTotal);
+        calculateTotal();
+    </script>
+</body>
+</html>
+
+
+

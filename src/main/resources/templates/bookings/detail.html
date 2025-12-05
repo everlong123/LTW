@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác Nhận Đặt Tour</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Xác Nhận Đặt Tour</h1>
+            <nav>
+                <a th:href="@{/tours}">Trang Chủ</a>
+                <span th:if="${#authentication.isAuthenticated()}">
+                    <a th:href="@{/bookings/my-bookings}">Tour Của Tôi</a>
+                    <span>Xin chào, <strong th:text="${#authentication.name}"></strong></span>
+                    <a th:href="@{/logout}">Đăng xuất</a>
+                </span>
+                <span th:unless="${#authentication.isAuthenticated()}">
+                    <a th:href="@{/login}">Đăng nhập</a>
+                    <a th:href="@{/register}">Đăng ký</a>
+                </span>
+            </nav>
+        </header>
+
+        <main>
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+            <div class="booking-confirmation">
+                <h2>Đặt tour thành công!</h2>
+                <div class="confirmation-details">
+                    <h3>Thông tin đặt tour</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Mã đặt tour:</strong>
+                            <span>#<span th:text="${booking.id}"></span></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Tên tour:</strong>
+                            <span th:text="${booking.tour.name}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Địa điểm:</strong>
+                            <span th:text="${booking.tour.location}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Số ngày:</strong>
+                            <span th:text="${booking.tour.numberOfDays}"></span> ngày
+                        </div>
+                        <div class="info-item">
+                            <strong>Ngày khởi hành:</strong>
+                            <span th:text="${#temporals.format(booking.tour.departureDate, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Họ và tên:</strong>
+                            <span th:text="${booking.customerName}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Email:</strong>
+                            <span th:text="${booking.customerEmail}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Số điện thoại:</strong>
+                            <span th:text="${booking.customerPhone}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Số người:</strong>
+                            <span th:text="${booking.numberOfPeople}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Tổng giá:</strong>
+                            <span class="price" th:text="${#numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT')}"></span> VNĐ
+                        </div>
+                        <div class="info-item">
+                            <strong>Trạng thái thanh toán:</strong>
+                            <span th:class="${booking.paymentStatus ? 'status-paid' : 'status-unpaid'}" 
+                                  th:text="${booking.paymentStatus ? 'Đã thanh toán' : 'Chưa thanh toán'}"></span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Ngày đặt:</strong>
+                            <span th:text="${#temporals.format(booking.bookingDate, 'dd/MM/yyyy HH:mm')}"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="confirmation-message">
+                    <p>Email xác nhận đã được gửi đến <strong th:text="${booking.customerEmail}"></strong></p>
+                    <p>Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</p>
+                </div>
+                <div class="confirmation-actions">
+                    <a th:href="@{/tours}" class="btn btn-primary">Xem thêm tour</a>
+                    <a th:if="${#authentication.isAuthenticated()}" 
+                       th:href="@{/bookings/my-bookings}" 
+                       class="btn">Xem tour của tôi</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
+

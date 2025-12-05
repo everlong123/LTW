@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Khách Đặt Tour</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Danh Sách Khách Đặt Tour</h1>
+            <nav>
+                <a th:href="@{/tours}">Trang Chủ</a>
+                <a th:href="@{/tours/admin}">Quản Lý Tour</a>
+                <a th:href="@{/bookings/admin}">Quản Lý Đặt Tour</a>
+                <span>Xin chào, <strong th:text="${#authentication.name}"></strong></span>
+                <a th:href="@{/logout}">Đăng xuất</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="admin-header">
+                <h2 th:text="'Danh sách khách đặt tour: ' + ${tour.name}"></h2>
+                <div class="tour-summary">
+                    <p><strong>Địa điểm:</strong> <span th:text="${tour.location}"></span></p>
+                    <p><strong>Ngày khởi hành:</strong> <span th:text="${#temporals.format(tour.departureDate, 'dd/MM/yyyy')}"></span></p>
+                    <p><strong>Tổng số chỗ:</strong> <span th:text="${tour.maxCustomers}"></span></p>
+                    <p><strong>Đã đặt:</strong> <span th:text="${tour.currentBookings}"></span></p>
+                    <p><strong>Còn lại:</strong> <span th:text="${tour.availableSlots}"></span></p>
+                </div>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đặt</th>
+                            <th>Họ và tên</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Địa chỉ</th>
+                            <th>Số người</th>
+                            <th>Tổng giá</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày đặt</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="booking : ${bookings}">
+                            <td th:text="${booking.id}"></td>
+                            <td th:text="${booking.customerName}"></td>
+                            <td th:text="${booking.customerEmail}"></td>
+                            <td th:text="${booking.customerPhone}"></td>
+                            <td th:text="${booking.customerAddress != null ? booking.customerAddress : 'N/A'}"></td>
+                            <td th:text="${booking.numberOfPeople}"></td>
+                            <td th:text="${#numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT')}"></td>
+                            <td>
+                                <span th:class="${booking.paymentStatus ? 'status-paid' : 'status-unpaid'}" 
+                                      th:text="${booking.paymentStatus ? 'Đã thanh toán' : 'Chưa thanh toán'}"></span>
+                            </td>
+                            <td th:text="${#temporals.format(booking.bookingDate, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td>
+                                <form th:action="@{/bookings/admin/update-payment/{id}(id=${booking.id})}" method="post" style="display: inline;">
+                                    <input type="hidden" name="paymentStatus" th:value="${!booking.paymentStatus}">
+                                    <button type="submit" class="btn btn-small">
+                                        <span th:text="${booking.paymentStatus ? 'Hủy thanh toán' : 'Đánh dấu đã thanh toán'}"></span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5"><strong>Tổng cộng:</strong></td>
+                            <td><strong th:text="${#lists.size(bookings)}"></strong> đơn</td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div th:if="${#lists.isEmpty(bookings)}" class="no-results">
+                <p>Chưa có khách nào đặt tour này.</p>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/tours/admin}" class="btn">Quay lại</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
