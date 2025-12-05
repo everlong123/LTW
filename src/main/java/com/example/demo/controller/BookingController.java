@@ -65,15 +65,20 @@ public class BookingController {
             @Valid @ModelAttribute Booking booking,
             BindingResult result,
             @RequestParam Long tourId,
+            Model model,
             RedirectAttributes redirectAttributes) {
         
-        if (result.hasErrors()) {
-            Optional<Tour> tour = tourService.getTourById(tourId);
-            if (tour.isPresent()) {
-                redirectAttributes.addFlashAttribute("tour", tour.get());
-                return "redirect:/bookings/new/" + tourId;
-            }
+        Optional<Tour> tour = tourService.getTourById(tourId);
+        if (!tour.isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "Tour không tồn tại");
             return "redirect:/tours";
+        }
+        
+        if (result.hasErrors()) {
+            // Nếu có lỗi validation, trả về lại form với error messages
+            model.addAttribute("tour", tour.get());
+            model.addAttribute("booking", booking);
+            return "bookings/form";
         }
 
         try {
@@ -94,21 +99,25 @@ public class BookingController {
             }
 
             Booking savedBooking = bookingService.createBooking(booking, tourId, userId);
-            redirectAttributes.addFlashAttribute("success", "Đặt tour thành công! Email xác nhận đã được gửi đến " + booking.getCustomerEmail());
+            redirectAttributes.addFlashAttribute("success", "Đặt tour thành công! Bạn có thể xem chi tiết đặt tour bên dưới.");
             return "redirect:/bookings/" + savedBooking.getId();
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/bookings/new/" + tourId;
+            // Nếu có lỗi, trả về lại form với error message
+            model.addAttribute("tour", tour.get());
+            model.addAttribute("booking", booking);
+            model.addAttribute("error", e.getMessage());
+            return "bookings/form";
         }
     }
 
     @GetMapping("/{id}")
-    public String viewBooking(@PathVariable Long id, Model model) {
+    public String viewBooking(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Booking> booking = bookingService.getBookingById(id);
         if (booking.isPresent()) {
             model.addAttribute("booking", booking.get());
             return "bookings/detail";
         }
+        redirectAttributes.addFlashAttribute("error", "Không tìm thấy thông tin đặt tour.");
         return "redirect:/tours";
     }
 
@@ -125,9 +134,9 @@ public class BookingController {
                 // Tìm bookings theo user_id (ưu tiên)
                 bookings = bookingService.getBookingsByUser(currentUser.getId());
                 
-                // Nếu không tìm thấy theo user_id, thử tìm theo email
-                // (cho trường hợp booking được tạo khi user chưa đăng nhập hoặc user_id chưa được set)
-                if (bookings.isEmpty() && currentUser.getEmail() != null && !currentUser.getEmail().isEmpty()) {
+                // Luôn tìm theo email để đảm bảo tìm được tất cả bookings
+                // (cho trường hợp booking được tạo khi user_id chưa được set đúng)
+                if (currentUser.getEmail() != null && !currentUser.getEmail().isEmpty()) {
                     List<Booking> bookingsByEmail = bookingService.getBookingsByEmail(currentUser.getEmail());
                     
                     // Kết hợp cả hai danh sách và loại bỏ trùng lặp
