@@ -35,17 +35,17 @@
                 <h2>Dành cho Khách hàng</h2>
                 <div class="features-grid">
                     <div class="feature-card">
-                        <h3>🔍 Xem Danh Sách Tour</h3>
+                        <h3>Xem Danh Sách Tour</h3>
                         <p>Khám phá các tour du lịch hấp dẫn với đầy đủ thông tin</p>
                         <a th:href="@{/tours}" class="btn btn-primary">Xem Tour</a>
                     </div>
                     <div class="feature-card">
-                        <h3>📅 Đặt Tour Online</h3>
+                        <h3>Đặt Tour Online</h3>
                         <p>Đặt tour nhanh chóng, tiện lợi chỉ với vài cú click</p>
                         <a th:href="@{/tours}" class="btn btn-primary">Đặt Tour</a>
                     </div>
                     <div class="feature-card" th:if="${username}">
-                        <h3>📋 Tour Của Tôi</h3>
+                        <h3>Tour Của Tôi</h3>
                         <p>Xem lịch sử và quản lý các tour đã đặt</p>
                         <a th:href="@{/bookings/my-bookings}" class="btn btn-primary">Xem Tour Của Tôi</a>
                     </div>
@@ -57,12 +57,12 @@
                 <h2>Dành cho Quản trị viên</h2>
                 <div class="features-grid">
                     <div class="feature-card">
-                        <h3>➕ Quản Lý Tour</h3>
+                        <h3>Quản Lý Tour</h3>
                         <p>Thêm, sửa, xóa tour du lịch</p>
                         <a th:href="@{/tours/admin}" class="btn btn-primary">Quản Lý Tour</a>
                     </div>
                     <div class="feature-card">
-                        <h3>👥 Quản Lý Đặt Tour</h3>
+                        <h3>Quản Lý Đặt Tour</h3>
                         <p>Theo dõi và quản lý các đơn đặt tour của khách hàng</p>
                         <a th:href="@{/bookings/admin}" class="btn btn-primary">Quản Lý Đặt Tour</a>
                     </div>
