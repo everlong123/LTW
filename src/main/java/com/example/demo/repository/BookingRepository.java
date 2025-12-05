@@ -15,8 +15,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     List<Booking> findByTourId(Long tourId);
     
-    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId ORDER BY b.bookingDate DESC")
+    @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.tour WHERE b.user.id = :userId ORDER BY b.bookingDate DESC")
     List<Booking> findByUserId(@Param("userId") Long userId);
+    
+    @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.tour WHERE b.customerEmail = :email ORDER BY b.bookingDate DESC")
+    List<Booking> findByCustomerEmail(@Param("email") String email);
     
     @Query("SELECT b FROM Booking b ORDER BY b.bookingDate DESC")
     List<Booking> findAllOrderByBookingDateDesc();

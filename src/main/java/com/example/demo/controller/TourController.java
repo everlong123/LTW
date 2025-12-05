@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/tours")
@@ -27,7 +28,17 @@ public class TourController {
     @Autowired
     private TourService tourService;
 
-    private static final String UPLOAD_DIR_ABSOLUTE = System.getProperty("user.dir") + "/src/main/resources/static/images/tours/";
+    // Lấy đường dẫn thư mục static/images/tours
+    private Path getUploadDir() {
+        String userDir = System.getProperty("user.dir");
+        // Kiểm tra nếu đang chạy từ thư mục demo
+        Path uploadPath = Paths.get(userDir, "src", "main", "resources", "static", "images", "tours");
+        // Nếu không tồn tại, thử đường dẫn từ root project
+        if (!Files.exists(uploadPath)) {
+            uploadPath = Paths.get(userDir, "demo", "src", "main", "resources", "static", "images", "tours");
+        }
+        return uploadPath;
+    }
 
     @GetMapping
     public String listTours(
@@ -112,16 +123,29 @@ public class TourController {
         // Xử lý upload ảnh
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
-                String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-                Path uploadPath = Paths.get(UPLOAD_DIR_ABSOLUTE);
+                // Lấy extension của file
+                String originalFilename = imageFile.getOriginalFilename();
+                String extension = "";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                }
                 
+                // Tạo tên file unique để tránh trùng lặp
+                String fileName = UUID.randomUUID().toString() + "_" + System.currentTimeMillis() + extension;
+                
+                // Lấy đường dẫn upload
+                Path uploadPath = getUploadDir();
+                
+                // Tạo thư mục nếu chưa tồn tại
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
                 
+                // Lưu file
                 Path filePath = uploadPath.resolve(fileName);
                 Files.write(filePath, imageFile.getBytes());
                 
+                // Set URL cho ảnh (đường dẫn tương đối từ static)
                 tour.setImageUrl("/images/tours/" + fileName);
             } catch (IOException e) {
                 redirectAttributes.addFlashAttribute("error", "Lỗi khi upload ảnh: " + e.getMessage());

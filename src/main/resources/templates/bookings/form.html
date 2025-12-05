@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
         <header>
             <h1>Đặt Tour</h1>
             <nav>
-                <a th:href="@{/tours}">Trang Chủ</a>
+                <a th:href="@{/home}">Trang Chủ</a>
                 <span th:if="${#authentication.isAuthenticated()}">
                     <a th:href="@{/bookings/my-bookings}">Tour Của Tôi</a>
                     <span>Xin chào, <strong th:text="${#authentication.name}"></strong></span>

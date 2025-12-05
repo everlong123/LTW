@@ -35,13 +35,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .headers(headers -> headers
+                .xssProtection(xss -> xss.disable())
+            )
             .authorizeHttpRequests(auth -> auth
                 // Cho phép truy cập css, js, home khi không xác thực
                 .requestMatchers("/", "/home", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/login", "/login-process").permitAll()
                 .requestMatchers("/register", "/register-process").permitAll()
-                .requestMatchers("/tours", "/tours/**").permitAll()
-                .requestMatchers("/bookings/new/**", "/bookings/create", "/bookings/*").permitAll()
+                // Cho phép xem tours (chỉ xem, không đặt tour)
+                .requestMatchers("/tours", "/tours/{id}").permitAll()
+                // Đặt tour yêu cầu đăng nhập
+                .requestMatchers("/bookings/new/**", "/bookings/create", "/bookings/{id}").authenticated()
+                // Admin endpoints
                 .requestMatchers("/tours/admin/**", "/bookings/admin/**").hasRole("ADMIN")
+                // User endpoints
                 .requestMatchers("/bookings/my-bookings").authenticated()
                 // Các tài nguyên khác bắt buộc xác thực
                 .anyRequest().authenticated()
@@ -50,6 +58,7 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .loginProcessingUrl("/login-process")
                 .defaultSuccessUrl("/home", true)
+                .failureUrl("/login?error=true")
                 .permitAll()
             )
             .logout(logout -> logout

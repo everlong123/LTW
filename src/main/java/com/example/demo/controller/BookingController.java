@@ -35,14 +35,15 @@ public class BookingController {
 
     @GetMapping("/new/{tourId}")
     public String bookingForm(@PathVariable Long tourId, Model model) {
+        // Yêu cầu đăng nhập - Spring Security sẽ tự động redirect nếu chưa login
         Optional<Tour> tour = tourService.getTourById(tourId);
         if (tour.isPresent()) {
             model.addAttribute("tour", tour.get());
             model.addAttribute("booking", new Booking());
             
-            // Nếu user đã đăng nhập, lấy thông tin
+            // Lấy thông tin user đã đăng nhập (chắc chắn đã login vì đã qua Security)
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+            if (auth != null && auth.isAuthenticated()) {
                 Optional<User> user = userRepository.findByUsername(auth.getName());
                 if (user.isPresent()) {
                     Booking booking = new Booking();
@@ -76,13 +77,20 @@ public class BookingController {
         }
 
         try {
+            // Yêu cầu đăng nhập - Spring Security sẽ tự động redirect nếu chưa login
             Long userId = null;
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+            if (auth != null && auth.isAuthenticated()) {
                 Optional<User> user = userRepository.findByUsername(auth.getName());
                 if (user.isPresent()) {
                     userId = user.get().getId();
                 }
+            }
+            
+            // Nếu không có userId (không nên xảy ra vì đã yêu cầu authenticated), redirect về login
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập để đặt tour");
+                return "redirect:/login";
             }
 
             Booking savedBooking = bookingService.createBooking(booking, tourId, userId);
@@ -106,11 +114,33 @@ public class BookingController {
 
     @GetMapping("/my-bookings")
     public String myBookings(Model model) {
+        // Yêu cầu đăng nhập - Spring Security sẽ tự động redirect nếu chưa login
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+        if (auth != null && auth.isAuthenticated()) {
             Optional<User> user = userRepository.findByUsername(auth.getName());
             if (user.isPresent()) {
-                List<Booking> bookings = bookingService.getBookingsByUser(user.get().getId());
+                User currentUser = user.get();
+                List<Booking> bookings;
+                
+                // Tìm bookings theo user_id (ưu tiên)
+                bookings = bookingService.getBookingsByUser(currentUser.getId());
+                
+                // Nếu không tìm thấy theo user_id, thử tìm theo email
+                // (cho trường hợp booking được tạo khi user chưa đăng nhập hoặc user_id chưa được set)
+                if (bookings.isEmpty() && currentUser.getEmail() != null && !currentUser.getEmail().isEmpty()) {
+                    List<Booking> bookingsByEmail = bookingService.getBookingsByEmail(currentUser.getEmail());
+                    
+                    // Kết hợp cả hai danh sách và loại bỏ trùng lặp
+                    for (Booking emailBooking : bookingsByEmail) {
+                        // Chỉ thêm nếu chưa có trong danh sách (so sánh theo ID)
+                        boolean exists = bookings.stream()
+                                .anyMatch(b -> b.getId().equals(emailBooking.getId()));
+                        if (!exists) {
+                            bookings.add(emailBooking);
+                        }
+                    }
+                }
+                
                 model.addAttribute("bookings", bookings);
                 return "bookings/my-bookings";
             }

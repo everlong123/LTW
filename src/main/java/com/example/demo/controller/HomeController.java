@@ -12,7 +12,7 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && !authentication.getName().equals("anonymousUser")) {
+        if (authentication != null && authentication.isAuthenticated()) {
             model.addAttribute("username", authentication.getName());
             model.addAttribute("authorities", authentication.getAuthorities());
             model.addAttribute("isAdmin", authentication.getAuthorities().stream()

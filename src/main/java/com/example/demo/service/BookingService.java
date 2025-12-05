@@ -46,13 +46,36 @@ public class BookingService {
         booking.setTotalPrice(totalPrice);
         booking.setTour(tour);
 
+        // Set user nếu userId được cung cấp
         if (userId != null) {
             User user = userRepository.findById(userId)
                     .orElse(null);
-            booking.setUser(user);
+            if (user != null) {
+                booking.setUser(user);
+                System.out.println("DEBUG: Booking created with user_id: " + userId + ", username: " + user.getUsername());
+            } else {
+                System.out.println("DEBUG: User not found with userId: " + userId);
+            }
+        } else {
+            System.out.println("DEBUG: userId is null, trying to find user by email");
+            // Nếu userId null nhưng có email, thử tìm user theo email và set vào
+            // (để đảm bảo booking được liên kết với user nếu user đã tồn tại)
+            if (booking.getCustomerEmail() != null && !booking.getCustomerEmail().isEmpty()) {
+                User userByEmail = userRepository.findByEmail(booking.getCustomerEmail())
+                        .orElse(null);
+                if (userByEmail != null) {
+                    booking.setUser(userByEmail);
+                    System.out.println("DEBUG: Booking linked to user by email: " + userByEmail.getUsername());
+                } else {
+                    System.out.println("DEBUG: No user found with email: " + booking.getCustomerEmail());
+                }
+            }
         }
 
         Booking savedBooking = bookingRepository.save(booking);
+        
+        // Reload booking để đảm bảo có đầy đủ thông tin
+        savedBooking = bookingRepository.findById(savedBooking.getId()).orElse(savedBooking);
 
         // Gửi email xác nhận
         sendBookingConfirmationEmail(savedBooking);
@@ -69,7 +92,20 @@ public class BookingService {
     }
 
     public List<Booking> getBookingsByUser(Long userId) {
-        return bookingRepository.findByUserId(userId);
+        if (userId != null) {
+            List<Booking> bookings = bookingRepository.findByUserId(userId);
+            System.out.println("DEBUG: getBookingsByUser - userId: " + userId + ", found: " + bookings.size() + " bookings");
+            return bookings;
+        }
+        System.out.println("DEBUG: getBookingsByUser - userId is null, returning empty list");
+        return List.of(); // Trả về danh sách rỗng nếu userId null
+    }
+    
+    public List<Booking> getBookingsByEmail(String email) {
+        if (email != null && !email.isEmpty()) {
+            return bookingRepository.findByCustomerEmail(email);
+        }
+        return List.of();
     }
 
     public Optional<Booking> getBookingById(Long id) {
